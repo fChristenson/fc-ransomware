@@ -15,7 +15,6 @@ pub fn get_args<'a>() -> ArgMatches<'a> {
             .short("k")
             .long("key")
             .takes_value(true)
-            .required(true)
             .help("The secret key used to encrypt or decrypt a file"))
         .get_matches()
 }
@@ -43,4 +42,9 @@ pub fn run_operation(path_to_file: &path::PathBuf, key: &str) -> result::Result<
         .map(|(i, val)| val ^ key.chars().nth(i % key.len()).unwrap() as u8)
         .collect();
     fs::write(path_to_file, output)
+}
+
+pub fn get_token(password: &str) -> Result<reqwest::Response, reqwest::Error> {
+  let url = format!("http://localhost:3000/token?password={password}", password = password);
+  reqwest::get(&url)
 }
